@@ -41,7 +41,7 @@ func (service *ShoppingCartService) GetByUserId(touristId int) (model.ShoppingCa
 
 		// Return the newly created cart.
 		//fmt.Printf("ispis 2")
-		return *createdCart, nil
+		return createdCart, nil
 	}
 
 	// Return the existing cart.

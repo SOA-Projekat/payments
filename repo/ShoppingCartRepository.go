@@ -18,15 +18,14 @@ func (repository *ShoppingCartRepo) GetByUserId(touristId int) (model.ShoppingCa
 	return cart, nil
 }
 
-func (repository *ShoppingCartRepo) Create(cart *model.ShoppingCart) (*model.ShoppingCart, error) {
-
+func (repository *ShoppingCartRepo) Create(cart *model.ShoppingCart) (model.ShoppingCart, error) {
 	dbCreationResult := repository.DatabaseConnection.Create(cart)
 	if dbCreationResult != nil {
 		err := dbCreationResult.Error
-		return nil, err // return nil and the error if creation failed
+		return *cart, err // return *cart and the error if creation failed
 	}
 
-	return cart, nil
+	return *cart, nil
 }
 
 func (repository *ShoppingCartRepo) Update(cart *model.ShoppingCart) (*model.ShoppingCart, error) {
