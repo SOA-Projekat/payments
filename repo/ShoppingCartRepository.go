@@ -31,10 +31,12 @@ func (repository *ShoppingCartRepo) Create(cart *model.ShoppingCart) (model.Shop
 func (repository *ShoppingCartRepo) Update(cart *model.ShoppingCart) (*model.ShoppingCart, error) {
 
 	updateResult := repository.DatabaseConnection.Model(cart).Updates(cart)
-	if updateResult != nil {
+	if updateResult.RowsAffected == 0 {
 		return nil, updateResult.Error
 	}
-
+	/*if updateResult != nil {
+		return nil, updateResult.Error
+	}*/
 	return cart, nil
 }
 

@@ -56,7 +56,7 @@ func main() {
 	// Routes for carts
 	router.HandleFunc("/shoppingcart/{id}", cartHandler.GetByUserId).Methods("GET")
 	router.HandleFunc("/shoppingcart/{cartId}/{tourId}", cartHandler.RemoveOrderItem).Methods("PUT")
-	router.HandleFunc("/shoppingcart/update", cartHandler.RemoveOrderItem).Methods("PUT")
+	router.HandleFunc("/shoppingcart/update", cartHandler.Update).Methods("PUT") //Zasto se ovde poziva RemoveOrderItem, a ne Update funkcija iz Handler-a
 
 	// CORS setup
 	permittedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})

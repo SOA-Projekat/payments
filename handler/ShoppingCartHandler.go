@@ -30,8 +30,8 @@ func (handler *ShoppingCartHandler) GetByUserId(writer http.ResponseWriter, req 
 }
 
 func (handler *ShoppingCartHandler) RemoveOrderItem(writer http.ResponseWriter, req *http.Request) {
-	cartId, _ := strconv.Atoi(mux.Vars(req)["id"])
-	tourId, _ := strconv.Atoi(mux.Vars(req)["id"])
+	cartId, _ := strconv.Atoi(mux.Vars(req)["cartId"])
+	tourId, _ := strconv.Atoi(mux.Vars(req)["tourId"])
 
 	cart, err := handler.ShoppingCartService.RemoveOrderItem(cartId, tourId)
 	writer.Header().Set("Content-Type", "application/json")
@@ -51,7 +51,7 @@ func (handler *ShoppingCartHandler) Update(writer http.ResponseWriter, req *http
 		return
 	}
 
-	cart, err := handler.ShoppingCartService.Update(obj)
+	cart, err := handler.ShoppingCartService.Update(&obj)
 	writer.Header().Set("Content-Type", "application/json")
 	if err != nil {
 		writer.WriteHeader(http.StatusNotFound)

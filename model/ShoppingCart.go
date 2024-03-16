@@ -6,6 +6,8 @@ import (
 	"fmt"
 )
 
+type OrderItemsValue []OrderItem
+
 type ShoppingCart struct {
 	ID         int             `json:"id" gorm:"primaryKey"`
 	TouristId  int             `json:"touristId"`
@@ -53,8 +55,6 @@ func (sc *ShoppingCart) calculateTotal() {
 	}
 	sc.Total = total
 }
-
-type OrderItemsValue []OrderItem
 
 // Value implements the driver.Valuer interface, converting the slice to JSON
 func (o OrderItemsValue) Value() (driver.Value, error) {
