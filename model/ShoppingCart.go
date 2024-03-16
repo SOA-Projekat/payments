@@ -1,10 +1,16 @@
 package model
 
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"fmt"
+)
+
 type ShoppingCart struct {
-	ID         int         `json:"id" gorm:"primaryKey"`
-	TouristId  int         `json:"touristId"`
-	OrderItems []OrderItem `json:"orderItems" gorm:"type:jsonb;default:'[]'"`
-	Total      float64     `json:"total"`
+	ID         int             `json:"id" gorm:"primaryKey"`
+	TouristId  int             `json:"touristId"`
+	OrderItems OrderItemsValue `json:"orderItems" gorm:"type:jsonb;default:'[]'"`
+	Total      float64         `json:"total"`
 }
 
 func NewShoppingCart(touristId int) *ShoppingCart {
@@ -46,4 +52,34 @@ func (sc *ShoppingCart) calculateTotal() {
 		total += item.Price
 	}
 	sc.Total = total
+}
+
+type OrderItemsValue []OrderItem
+
+// Value implements the driver.Valuer interface, converting the slice to JSON
+func (o OrderItemsValue) Value() (driver.Value, error) {
+	if len(o) == 0 {
+		return "[]", nil // Return empty JSON array if slice is empty
+	}
+	return json.Marshal(o)
+}
+
+// Scan implements the sql.Scanner interface, converting JSON to a slice
+func (o *OrderItemsValue) Scan(input interface{}) error {
+	if input == nil {
+		return nil // If the input is nil, just leave the slice as nil
+	}
+
+	bytes, ok := input.([]byte)
+	if !ok {
+		return fmt.Errorf("need []byte type for OrderItemsValue, got %T", input)
+	}
+
+	result := OrderItemsValue{}
+	if err := json.Unmarshal(bytes, &result); err != nil {
+		return err
+	}
+
+	*o = result
+	return nil
 }
