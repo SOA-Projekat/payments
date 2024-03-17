@@ -41,7 +41,7 @@ func (service *ShoppingCartService) GetByUserId(touristId int) (model.ShoppingCa
 
 		// Return the newly created cart.
 		//fmt.Printf("ispis 2")
-		return *createdCart, nil
+		return createdCart, nil
 	}
 
 	// Return the existing cart.
@@ -69,10 +69,10 @@ func (service *ShoppingCartService) RemoveOrderItem(cartId int, tourId int) (*mo
 	return updatedCart, nil
 }
 
-func (service *ShoppingCartService) Update(cart model.ShoppingCart) (*model.ShoppingCart, error) {
+func (service *ShoppingCartService) Update(cart *model.ShoppingCart) (*model.ShoppingCart, error) {
 
 	// Update the shopping cart in the repository.
-	updatedCart, err := service.ShoppingCartRepo.Update(&cart)
+	updatedCart, err := service.ShoppingCartRepo.Update(cart)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update shopping cart: %w", err)
 	}
