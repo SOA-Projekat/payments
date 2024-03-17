@@ -60,3 +60,17 @@ func (handler *ShoppingCartHandler) Update(writer http.ResponseWriter, req *http
 	writer.WriteHeader(http.StatusOK)
 	json.NewEncoder(writer).Encode(cart)
 }
+
+func (handler *ShoppingCartHandler) Purchase(writer http.ResponseWriter, req *http.Request) {
+	id := mux.Vars(req)["cartId"]
+	idnum, _ := strconv.Atoi(id)
+	log.Printf("Cart sa id-em %s", id)
+	cart, err := handler.ShoppingCartService.Purchase(idnum)
+	writer.Header().Set("Content-Type", "application/json")
+	if err != nil {
+		writer.WriteHeader(http.StatusNotFound)
+		return
+	}
+	writer.WriteHeader(http.StatusOK)
+	json.NewEncoder(writer).Encode(cart)
+}

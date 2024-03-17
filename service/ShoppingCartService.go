@@ -12,6 +12,7 @@ import (
 
 type ShoppingCartService struct {
 	ShoppingCartRepo *repo.ShoppingCartRepo
+	TokenRepo        *repo.TourPurchaseTokenRepository
 }
 
 func (service *ShoppingCartService) GetByUserId(touristId int) (model.ShoppingCart, error) {
@@ -21,15 +22,14 @@ func (service *ShoppingCartService) GetByUserId(touristId int) (model.ShoppingCa
 	if err != nil {
 		// If an error occurs other than record not found, return the error.
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			fmt.Printf("duvaj ga")
 			return model.ShoppingCart{}, err
 		}
 
 		// Initialize a new cart if it doesn't exist.
 		newCart := &model.ShoppingCart{
 			TouristId:  touristId,
-			OrderItems: []model.OrderItem{}, // Assuming OrderItems should be initialized empty.
-			Total:      0,                   // Assuming the total should be initialized to 0.
+			OrderItems: []model.OrderItem{},
+			Total:      0,
 		}
 
 		// Create the new cart.
@@ -79,4 +79,36 @@ func (service *ShoppingCartService) Update(cart *model.ShoppingCart) (*model.Sho
 
 	// Map the updated cart to a DTO and return.
 	return updatedCart, nil
+}
+
+func (service *ShoppingCartService) Purchase(cartId int) (model.ShoppingCart, error) {
+	// Retrieve the shopping cart by ID
+	cart, err := service.ShoppingCartRepo.Get(cartId)
+	if err != nil {
+		return model.ShoppingCart{}, err // Handle error if the cart is not found
+	}
+
+	for _, item := range cart.OrderItems {
+		// For simplification, directly creating TourPurchaseToken
+		token := model.NewTourPurchaseToken(cart.TouristId, item.IdTour)
+
+		// Assuming Create function returns (*model.TourPurchaseToken, error)
+		_, err := service.TokenRepo.Create(token)
+		if err != nil {
+			return model.ShoppingCart{}, err // Handle error during token creation
+		}
+
+		// Remove the order item from the cart (implementation depends on your model's method)
+		// Assuming cart.RemoveOrderItem updates the cart's OrderItems slice
+		cart.RemoveOrderItem(item.IdTour)
+	}
+
+	// Update the cart after processing its items
+	_, err = service.ShoppingCartRepo.Update(&cart)
+	if err != nil {
+		return model.ShoppingCart{}, err
+	}
+
+	// Return the updated cart
+	return cart, nil
 }

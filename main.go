@@ -25,11 +25,7 @@ func initDB() *gorm.DB {
 	}
 
 	database.AutoMigrate(&model.ShoppingCart{})
-
-	err = database.AutoMigrate(&model.ShoppingCart{})
-	if err != nil {
-		log.Fatalf("Error migrating models: %v", err)
-	}
+	database.AutoMigrate(&model.TourPurchaseToken{})
 
 	return database
 }
@@ -43,20 +39,31 @@ func main() {
 
 	//Repositories
 	cartRepo := &repo.ShoppingCartRepo{DatabaseConnection: database}
+	tokenRepo := &repo.TourPurchaseTokenRepository{DatabaseConnection: database}
 
 	//Services
-	cartService := &service.ShoppingCartService{ShoppingCartRepo: cartRepo}
+	cartService := &service.ShoppingCartService{
+		ShoppingCartRepo: cartRepo,
+		TokenRepo:        tokenRepo,
+	}
+	tokenService := &service.TourPurchaseTokenService{TokenRepository: tokenRepo}
 
 	//Handlers
 	cartHandler := &handler.ShoppingCartHandler{ShoppingCartService: cartService}
+	tokenHandler := &handler.TourPurchaseTokenHandler{TokenHandler: tokenService}
 
 	// Router setup
 	router := mux.NewRouter().StrictSlash(true)
 
 	// Routes for carts
 	router.HandleFunc("/shoppingcart/{id}", cartHandler.GetByUserId).Methods("GET")
+	router.HandleFunc("/shoppingcart/purchase/{cartId}", cartHandler.Purchase).Methods("PUT")
 	router.HandleFunc("/shoppingcart/{cartId}/{tourId}", cartHandler.RemoveOrderItem).Methods("PUT")
-	router.HandleFunc("/shoppingcart/update", cartHandler.Update).Methods("PUT") //Zasto se ovde poziva RemoveOrderItem, a ne Update funkcija iz Handler-a
+	router.HandleFunc("/shoppingcart/update", cartHandler.Update).Methods("PUT")
+
+	// Routes for tokens
+	router.HandleFunc("/tokens", tokenHandler.GetAll).Methods("GET")
+	router.HandleFunc("/tokens/{touristId}", tokenHandler.GetAllByTourist).Methods("GET")
 
 	// CORS setup
 	permittedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
