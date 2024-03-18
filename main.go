@@ -26,7 +26,7 @@ func initDB() *gorm.DB {
 
 	database.AutoMigrate(&model.ShoppingCart{})
 	database.AutoMigrate(&model.TourPurchaseToken{})
-
+	database.AutoMigrate(&model.Coupon{})
 	return database
 }
 
@@ -40,6 +40,7 @@ func main() {
 	//Repositories
 	cartRepo := &repo.ShoppingCartRepo{DatabaseConnection: database}
 	tokenRepo := &repo.TourPurchaseTokenRepository{DatabaseConnection: database}
+	couponRepo := &repo.CouponRepo{DatabaseConnection: database}
 
 	//Services
 	cartService := &service.ShoppingCartService{
@@ -47,11 +48,11 @@ func main() {
 		TokenRepo:        tokenRepo,
 	}
 	tokenService := &service.TourPurchaseTokenService{TokenRepository: tokenRepo}
-
+	couponService := &service.CouponService{CouponRepo: couponRepo}
 	//Handlers
 	cartHandler := &handler.ShoppingCartHandler{ShoppingCartService: cartService}
 	tokenHandler := &handler.TourPurchaseTokenHandler{TokenHandler: tokenService}
-
+	couponHandler := &handler.CouponHandler{CouponService: couponService}
 	// Router setup
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -64,6 +65,13 @@ func main() {
 	// Routes for tokens
 	router.HandleFunc("/tokens", tokenHandler.GetAll).Methods("GET")
 	router.HandleFunc("/tokens/{touristId}", tokenHandler.GetAllByTourist).Methods("GET")
+
+	//Routes for coupons
+	router.HandleFunc("/authoring/coupon/getByCode", couponHandler.GetByCode).Methods("GET")
+	router.HandleFunc("/authoring/coupon/{authorId}", couponHandler.GetByAuthorId).Methods("GET")
+	router.HandleFunc("/authoring/coupon/{id}", couponHandler.Update).Methods("PUT")
+	router.HandleFunc("/authoring/coupon/{id}", couponHandler.Delete).Methods("DELETE")
+	router.HandleFunc("/authoring/coupon", couponHandler.Create).Methods("POST")
 
 	// CORS setup
 	permittedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
