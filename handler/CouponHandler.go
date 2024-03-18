@@ -89,3 +89,18 @@ func (handler *CouponHandler) Update(writer http.ResponseWriter, req *http.Reque
 	writer.WriteHeader(http.StatusOK)
 	json.NewEncoder(writer).Encode(updatedCoupon)
 }
+
+func (handler *CouponHandler) CheckCoupon(writer http.ResponseWriter, req *http.Request) {
+	code := req.URL.Query().Get("code")
+	tourId, _ := strconv.Atoi(req.URL.Query().Get("tourId"))
+	//log.Printf("Coupon with code: %s", code)
+
+	coupon, err := handler.CouponService.CheckCoupon(code, tourId)
+	writer.Header().Set("Content-Type", "application/json")
+	if err != nil {
+		writer.WriteHeader(http.StatusNotFound)
+		return
+	}
+	writer.WriteHeader(http.StatusOK)
+	json.NewEncoder(writer).Encode(coupon)
+}

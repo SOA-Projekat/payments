@@ -72,6 +72,7 @@ func main() {
 	router.HandleFunc("/authoring/coupon/{id}", couponHandler.Update).Methods("PUT")
 	router.HandleFunc("/authoring/coupon/{id}", couponHandler.Delete).Methods("DELETE")
 	router.HandleFunc("/authoring/coupon", couponHandler.Create).Methods("POST")
+	router.HandleFunc("/checkCoupon", couponHandler.CheckCoupon).Methods("GET")
 
 	// CORS setup
 	permittedHeaders := handlers.AllowedHeaders([]string{"Requested-With", "Content-Type", "Authorization"})
